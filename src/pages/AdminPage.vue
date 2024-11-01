@@ -5,6 +5,7 @@ import { fetchCategories, fetchProducers } from '@/entities/category/api'
 import type { IProducer } from '@/entities/producer/model/types'
 import type { FormInstance } from 'element-plus'
 import type { FormRules } from 'element-plus/lib/components'
+import { Delete } from '@element-plus/icons-vue'
 
 const activeTab = ref<'create' | 'data'>('create')
 
@@ -65,6 +66,32 @@ const rules = reactive<FormRules<RuleForm>>({
       trigger: 'blur',
     },
   ],
+  quantity: [
+    {
+      required: true,
+      message: 'Please input Product price',
+      trigger: 'blur',
+    },
+    {
+      min: 1,
+      max: 500,
+      message: 'Price has to range from 200 to 1000000000',
+      trigger: 'blur',
+    },
+  ],
+  description: [
+    {
+      required: true,
+      message: 'Please input Product description',
+      trigger: 'blue',
+    },
+    {
+      min: 50,
+      max: 500,
+      message: 'Length should be 50 to 500',
+      trigger: 'blur',
+    },
+  ],
 })
 
 created()
@@ -72,6 +99,18 @@ created()
 async function created() {
   categoryList.value = await fetchCategories()
   producerList.value = await fetchProducers()
+}
+
+function handleRemoveImage(image: Image) {
+  const idx = form.images.findIndex(img => img.key === image.key)
+  if (idx !== -1) form.images.splice(idx, 1)
+}
+
+function handleAddImage() {
+  form.images.push({
+    key: Date.now(),
+    value: '',
+  })
 }
 
 const onSubmit = () => {
@@ -94,7 +133,7 @@ const onSubmit = () => {
           <el-form-item label="Product name" prop="name">
             <el-input v-model="form.name" />
           </el-form-item>
-          <el-form-item label="Category">
+          <el-form-item label="Category" prop="category">
             <el-select
               v-model="form.category"
               placeholder="please select product category"
@@ -140,6 +179,34 @@ const onSubmit = () => {
                 <el-input-number v-model="form.quantity" :min="1" :max="500" />
               </el-form-item>
             </el-col>
+          </el-row>
+
+          <el-form-item
+            v-for="(image, idx) in form.images"
+            :key="idx"
+            :label="'Image ' + idx"
+            :prop="'image.' + idx + '.value'"
+            :rules="{
+              required: true,
+              message: 'image can not be null',
+              trigger: 'blur',
+            }"
+          >
+            <el-space>
+              <el-input v-model="image.value" />
+              <el-button
+                @click.prevent="handleRemoveImage(image)"
+                type="danger"
+                :icon="Delete"
+                plain
+              />
+            </el-space>
+          </el-form-item>
+
+          <el-row justify="end" class="mb-[0.8rem]">
+            <el-button @click.prevent="handleAddImage" type="primary" plain>
+              Add Image
+            </el-button>
           </el-row>
 
           <el-form-item label="Description" prop="description">
