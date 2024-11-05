@@ -23,7 +23,12 @@ class ApiInstance {
     this.axios.defaults.xsrfCookieName = 'csrftoken'
 
     this.axios.interceptors.request.use(function (req) {
-      req.headers.Authorization = `Bearer ${localStorage.getItem('token')}`
+      const userJSON = localStorage.getItem('user')
+      if (userJSON) {
+        const user = JSON.parse(userJSON)
+        req.headers.User = user.username
+      }
+
       return req
     })
   }

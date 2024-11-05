@@ -1,0 +1,47 @@
+### Send POST request to register user
+POST http://localhost:3000/auth/sign-up
+Content-Type: application/json
+
+{
+  "username": "daurxxxn",
+  "email": "test@test.kz",
+  "password": "Dauren2003"
+}
+
+### Send POST request to create category
+POST http://localhost:3000/categories
+Content-Type: application/json
+
+{
+  "name": "Furniture",
+  "description": "Home and office furniture including sofas, tables, and chairs."
+}
+
+### Send POST request to create producer
+POST http://localhost:3000/producers
+Content-Type: application/json
+
+{
+  "name": "RoboMaster",
+  "country": "China",
+  "imageUrl": "https://upload.wikimedia.org/wikipedia/en/0/09/RoboMaster_Logo.png",
+  "website": "https://www.robomaster.com/",
+  "description": "RoboMaster is a robotics competition and educational platform created by DJI."
+}
+
+### Send POST request to create product
+POST http://localhost:3000/products
+Content-Type: application/json
+
+{
+  "name": "iPhone 14",
+  "description": "The latest iPhone featuring advanced camera technology and A16 Bionic chip.",
+  "producer": "60d21b4667d0d8992e610c85",
+  "category": "60d21b4667d0d8992e610c86",
+  "price": 999,
+  "images": [
+    "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/iphone-14-pro-dynamic-island-2022?wid=1400&hei=1400&fmt=jpeg&qlt=95&op_usm=1.5,0.5"
+  ],
+  "stock": 50,
+  "createdAt": "2024-11-02T10:00:00Z"
+}

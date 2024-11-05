@@ -3,12 +3,19 @@ import { reactive, ref } from 'vue'
 import type { ICategory } from '@/entities/category/model/types'
 import { fetchCategories, fetchProducers } from '@/entities/category/api'
 import type { IProducer } from '@/entities/producer/model/types'
-import type { FormInstance } from 'element-plus'
-import type { FormRules } from 'element-plus/lib/components'
+import { type FormInstance, ElNotification, type FormRules } from 'element-plus'
 import { Delete } from '@element-plus/icons-vue'
+import { apiInstance } from '@/shared/api/base'
+import { fetchProducts } from '@/entities/product/api'
+import type { IProduct } from '@/entities/product/model/types'
 
-const activeTab = ref<'create' | 'data'>('create')
+const activeTab = ref<'create' | 'data'>('data')
 
+const visible = ref(false)
+
+const search = ref('')
+
+const productList = ref<IProduct[]>([])
 const categoryList = ref<ICategory[]>([])
 const producerList = ref<IProducer[]>([])
 
@@ -59,23 +66,11 @@ const rules = reactive<FormRules<RuleForm>>({
       message: 'Please input Product price',
       trigger: 'blur',
     },
-    {
-      min: 200,
-      max: 1_000_000_000,
-      message: 'Price has to range from 200 to 1000000000',
-      trigger: 'blur',
-    },
   ],
   quantity: [
     {
       required: true,
       message: 'Please input Product price',
-      trigger: 'blur',
-    },
-    {
-      min: 1,
-      max: 500,
-      message: 'Price has to range from 200 to 1000000000',
       trigger: 'blur',
     },
   ],
@@ -99,6 +94,7 @@ created()
 async function created() {
   categoryList.value = await fetchCategories()
   producerList.value = await fetchProducers()
+  await getProducts()
 }
 
 function handleRemoveImage(image: Image) {
@@ -113,8 +109,31 @@ function handleAddImage() {
   })
 }
 
-const onSubmit = () => {
-  console.log('submit!')
+const onSubmit = async () => {
+  await apiInstance.post('/products', {
+    ...form,
+    images: form.images.map(img => img.value),
+    stock: form.quantity,
+  })
+  activeTab.value = 'data'
+
+  await getProducts()
+}
+
+async function handleDelete(product: IProduct) {
+  visible.value = false
+  await apiInstance.delete(`/products/${product._id}`)
+  ElNotification({
+    title: 'Products',
+    message: `Product with id ${product._id} has been deleted successfully!`,
+    type: 'success',
+  })
+
+  await getProducts()
+}
+
+async function getProducts() {
+  productList.value = await fetchProducts()
 }
 </script>
 
@@ -141,7 +160,7 @@ const onSubmit = () => {
               <el-option
                 v-for="(category, idx) in categoryList"
                 :key="idx"
-                :value="category.id"
+                :value="category._id"
                 :label="category.name"
               />
             </el-select>
@@ -154,7 +173,7 @@ const onSubmit = () => {
               <el-option
                 v-for="(producer, idx) in producerList"
                 :key="idx"
-                :value="producer.id"
+                :value="producer._id"
                 :label="producer.name"
               />
             </el-select>
@@ -186,11 +205,6 @@ const onSubmit = () => {
             :key="idx"
             :label="'Image ' + idx"
             :prop="'image.' + idx + '.value'"
-            :rules="{
-              required: true,
-              message: 'image can not be null',
-              trigger: 'blur',
-            }"
           >
             <el-space>
               <el-input v-model="image.value" />
@@ -214,11 +228,90 @@ const onSubmit = () => {
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="onSubmit">Create</el-button>
-            <el-button>Cancel</el-button>
           </el-form-item>
         </el-form>
       </el-tab-pane>
-      <el-tab-pane label="Products" name="data">Товары</el-tab-pane>
+      <el-tab-pane label="Products" name="data">
+        <el-table
+          :data="productList"
+          :default-sort="{ prop: 'createdAt', order: 'descending' }"
+        >
+          <el-table-column
+            label="Created at"
+            prop="createdAt"
+            sortable
+            width="120"
+          >
+            <template #default="scope">
+              {{ scope.row.createdAt.split('T')[0] }}
+            </template>
+          </el-table-column>
+          <el-table-column label="Manufacturer" prop="producer" width="135">
+            <template #default="scope">
+              {{ scope.row.producer.name }}
+            </template>
+          </el-table-column>
+          <el-table-column label="Category" prop="category" width="135">
+            <template #default="scope">
+              {{ scope.row.category.name }}
+            </template>
+          </el-table-column>
+          <el-table-column label="Name" prop="name" />
+          <el-table-column label="Price" sortable prop="price" width="120">
+            <template #default="scope">
+              {{ scope.row.price.toLocaleString() }} ₸
+            </template>
+          </el-table-column>
+          <el-table-column label="Image" prop="images" width="150">
+            <template #default="scope">
+              <el-image
+                :src="scope.row.images[0]"
+                class="h-[8rem] mx-auto"
+                fit="cover"
+              />
+            </template>
+          </el-table-column>
+
+          <el-table-column align="right">
+            <template #header>
+              <el-input
+                v-model="search"
+                size="small"
+                placeholder="Type to search"
+              />
+            </template>
+            <template #default="scope">
+              <el-button
+                size="small"
+                @click="handleEdit(scope.$index, scope.row)"
+              >
+                Edit
+              </el-button>
+              <el-popover
+                :key="scope.row._id"
+                :visible="visible"
+                placement="bottom"
+                width="200"
+              >
+                <p>Are you sure you wish to delete this product?</p>
+                <el-button text @click="visible = false">Cancel</el-button>
+                <el-button
+                  size="small"
+                  type="danger"
+                  @click="handleDelete(scope.row)"
+                >
+                  Confirm
+                </el-button>
+                <template #reference>
+                  <el-button size="small" type="danger" @click="visible = true">
+                    Delete
+                  </el-button>
+                </template>
+              </el-popover>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-tab-pane>
     </el-tabs>
   </el-container>
 </template>
