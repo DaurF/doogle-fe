@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { type RouteLocationRaw, RouterView, useRouter } from 'vue-router'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { useUserStore } from '@/stores/user'
+import { storeToRefs } from 'pinia'
 
-const router = useRouter()
 const userStore = useUserStore()
+const router = useRouter()
+const { role, loggedIn } = storeToRefs(userStore)
 
 const activeIndex = ref('/')
-
-const loggedIn = computed(() => userStore.loggedIn)
-const role = computed(() => userStore.role)
 
 setUserOnStart()
 
@@ -27,6 +26,7 @@ function handleRouteTransition(payload: RouteLocationRaw) {
 
 function handleSignOut() {
   userStore.resetUser()
+  router.push({ name: 'sign-in' })
 }
 </script>
 
@@ -54,14 +54,51 @@ function handleSignOut() {
         >
           Catalog
         </el-menu-item>
+
+        <template v-if="role === 'customer'">
+          <el-menu-item
+            @click="handleRouteTransition({ name: 'orders' })"
+            :route="{ name: 'orders' }"
+            index="2"
+          >
+            Orders
+          </el-menu-item>
+          <el-menu-item
+            @click="handleRouteTransition({ name: 'cart' })"
+            :route="{ name: 'cart' }"
+            index="3"
+          >
+            Cart
+          </el-menu-item>
+        </template>
+
+        <template v-if="role === 'supplier'">
+          <el-menu-item
+            @click="handleRouteTransition({ name: 'supplier' })"
+            :route="{ name: 'supplier' }"
+            index="4"
+          >
+            Supplier
+          </el-menu-item>
+          <el-menu-item
+            @click="handleRouteTransition({ name: 'requests' })"
+            :route="{ name: 'requests' }"
+            index="5"
+          >
+            Requests
+          </el-menu-item>
+        </template>
+
         <el-menu-item
-          @click="handleRouteTransition({ name: 'orders' })"
-          :route="{ name: 'orders' }"
-          index="2"
+          @click="handleRouteTransition({ name: 'incoming-requests' })"
+          :route="{ name: 'incoming-requests' }"
+          index="6"
+          v-if="role === 'moder'"
         >
-          Orders
+          Incoming Requests
         </el-menu-item>
-        <el-menu-item class="el-menu-item--off-css">
+
+        <el-menu-item class="el-menu-item--off-css el-menu-item--off-css--end">
           <el-button
             v-if="role === 'admin'"
             @click="handleRouteTransition({ name: 'admin' })"
@@ -102,11 +139,7 @@ function handleSignOut() {
   cursor: pointer;
 }
 
-.el-menu--horizontal > .el-menu-item:nth-child(2) {
+.el-menu-item--off-css--end {
   margin-left: auto;
-}
-
-.el-menu--horizontal > .el-menu-item:nth-child(3) {
-  margin-right: auto;
 }
 </style>

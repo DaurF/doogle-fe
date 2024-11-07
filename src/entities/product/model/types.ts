@@ -10,4 +10,6 @@ export interface IProduct {
   price: number
   stock: number
   images: string[]
+  isFavorite: boolean
+  isInCart: boolean
 }

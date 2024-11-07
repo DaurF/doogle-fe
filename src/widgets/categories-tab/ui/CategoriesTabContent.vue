@@ -48,20 +48,25 @@ const rules = reactive<FormRules<RuleForm>>({
 })
 
 const onSubmit = async () => {
-  try {
-    await apiInstance.post('/categories', form)
-    ElNotification({
-      type: 'success',
-      title: 'Categories',
-      message: `Category ${form.name} has been created`,
-    })
-  } catch (err) {
-    ElMessage({
-      message: err.message,
-      type: 'error',
-    })
-  }
-  emit('update-categories')
+  await formRef.value?.validate(async valid => {
+    if (valid) {
+      try {
+        await apiInstance.post('/categories', form)
+        ElNotification({
+          type: 'success',
+          title: 'Categories',
+          message: `Category ${form.name} has been created`,
+        })
+        formRef.value?.resetFields()
+      } catch (err) {
+        ElMessage({
+          message: err.message,
+          type: 'error',
+        })
+      }
+      emit('update-categories')
+    }
+  })
 }
 
 async function handleDeleteCategory(id: string) {
@@ -125,20 +130,21 @@ function handleShowEdit(data: ICategory) {
     :data="categories"
     border
     style="width: 100%"
-    empty-text="Нет категорий"
+    empty-text="No categories"
   >
     <el-table-column prop="name" label="Name" width="180" />
     <el-table-column prop="description" label="Description" />
-    <el-table-column fixed="right" label="Operations" width="150">
+    <el-table-column fixed="right" label="Operations" min-width="15">
       <template #default="scope">
         <el-button
-          link
-          type="primary"
-          size="small"
           @click="handleShowEdit(scope.row)"
+          size="small"
+          type="primary"
+          plain
         >
           Edit
         </el-button>
+
         <el-popconfirm
           title="Are you sure to delete this?"
           @confirm="handleDeleteCategory(scope.row._id)"
@@ -151,7 +157,14 @@ function handleShowEdit(data: ICategory) {
           "
         >
           <template #reference>
-            <el-button link type="danger" size="small">Remove</el-button>
+            <el-button
+              @click="handleDelete(scope.$index, scope.row)"
+              size="small"
+              type="danger"
+              plain
+            >
+              Delete
+            </el-button>
           </template>
           <template #actions="{ confirm, cancel }">
             <el-button @click="cancel" size="small">No</el-button>
@@ -166,7 +179,7 @@ function handleShowEdit(data: ICategory) {
 
   <el-dialog
     v-model="dialogVisible"
-    title="Tips"
+    title="Update Category"
     width="500"
     :before-close="handleClose"
   >

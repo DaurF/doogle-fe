@@ -1,31 +1,56 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { apiInstance } from '@/shared/api/base'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import type { FormInstance, FormRules } from 'element-plus'
 
 const router = useRouter()
 const userStore = useUserStore()
 
-const form = reactive<RuleForm>({
+interface LoginRuleForm {
+  username: string
+  password: string
+}
+
+const formRef = ref<FormInstance>()
+
+const form = reactive<LoginRuleForm>({
   username: '',
   password: '',
 })
 
+const formRules = reactive<FormRules<LoginRuleForm>>({
+  username: {
+    required: true,
+    message: 'Please input username',
+    trigger: 'change',
+  },
+  password: {
+    required: true,
+    message: 'Please input password',
+    trigger: 'change',
+  },
+})
+
 async function handleSubmit() {
-  const { email, username, role } = await apiInstance.post(
-    '/auth/sign-in',
-    form,
-  )
+  await formRef.value?.validate(async valid => {
+    if (valid) {
+      const { email, username, role } = await apiInstance.post(
+        '/auth/sign-in',
+        form,
+      )
 
-  console.log(email, username, role)
+      console.log(email, username, role)
 
-  await router.push({ name: 'home' })
+      await router.push({ name: 'home' })
 
-  const payload = { email, username, role }
+      const payload = { email, username, role }
 
-  userStore.setUser(payload)
-  localStorage.setItem('user', JSON.stringify(payload))
+      userStore.setUser(payload)
+      localStorage.setItem('user', JSON.stringify(payload))
+    }
+  })
 }
 </script>
 
@@ -34,11 +59,12 @@ async function handleSubmit() {
     <h1 class="text-[2.4rem] mt-[1.6rem] mb-[1.2rem]">Login</h1>
     <el-form
       :model="form"
+      :rules="formRules"
       label-width="auto"
       ref="formRef"
       label-position="top"
     >
-      <el-form-item label="Username" prop="name">
+      <el-form-item label="Username" prop="username">
         <el-input v-model="form.username" />
       </el-form-item>
       <el-form-item label="Password" prop="password">

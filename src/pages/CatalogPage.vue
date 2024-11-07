@@ -20,26 +20,42 @@ async function addToFavorites(productId: string) {
 
 <template>
   <el-container direction="vertical" class="max-w-[60%] mx-auto">
-    <div class="grid grid-cols-3 gap-[2.4rem] items-stretch">
-      <RouterLink
-        :to="{ name: 'product', params: { id: product._id } }"
-        v-for="(product, idx) in productList"
-        :key="idx"
-      >
-        <el-card class="h-full">
-          <template #header>
-            <div class="card-header">
-              <span>{{ product.name }}</span>
-            </div>
-          </template>
-
-          <div class="flex justify-center mb-[1.6rem]">
-            <el-image :src="product.images[0]" class="h-[16rem]" fit="cover" />
-          </div>
-          <p class="overflow-auto">{{ product.description }}</p>
+    <h1 class="text-[2.4rem] mt-[1.6rem]">Catalog</h1>
+    <el-divider />
+    <el-row :gutter="20">
+      <el-col :span="6">
+        <el-card shadow="never">
+          <el-input placeholder="Search..." />
         </el-card>
-      </RouterLink>
-    </div>
+      </el-col>
+      <el-col :span="18">
+        <div class="grid grid-cols-3 gap-[2.4rem] items-stretch">
+          <RouterLink
+            :to="{ name: 'product', params: { id: product._id } }"
+            v-for="(product, idx) in productList"
+            :key="idx"
+          >
+            <el-card class="h-full" shadow="never">
+              <template #header>
+                <span class="text-[1.6rem]">{{ product.name }}</span>
+              </template>
+
+              <div class="flex justify-center mb-[1.6rem]">
+                <el-image
+                  :src="product.images[0]"
+                  class="h-[12rem]"
+                  fit="cover"
+                />
+              </div>
+              <p class="overflow-auto text-[1.2rem] mb-[1.2rem]">
+                {{ product.description }}
+              </p>
+              <p class="text-end">Осталось: {{ product.stock }} шт.</p>
+            </el-card>
+          </RouterLink>
+        </div>
+      </el-col>
+    </el-row>
   </el-container>
 </template>
 

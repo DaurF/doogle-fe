@@ -8,7 +8,9 @@ export const useUserStore = defineStore('user', () => {
 
   const getUser = computed(() => user.value)
   const getLoggedIn = computed(() => loggedIn.value)
-  const getRole = computed(() => user.value?.role)
+  const getRole = computed<'customer' | 'moder' | 'admin' | 'supplier'>(
+    () => user.value?.role,
+  )
 
   function setUser(payload: IUser) {
     user.value = payload

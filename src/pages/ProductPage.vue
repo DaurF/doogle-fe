@@ -2,13 +2,13 @@
 import { ref } from 'vue'
 import type { IProduct } from '@/entities/product/model/types'
 import { apiInstance } from '@/shared/api/base'
-import { Star, StarFilled } from '@element-plus/icons-vue'
+import { ShoppingCart, Star, StarFilled, View } from '@element-plus/icons-vue'
+import { addToCart, removeFromCart } from '@/entities/user/api'
 
 const { id } = defineProps<{
   id: string
 }>()
 
-const dialogVisible = ref(false)
 const product = ref<IProduct | null>(null)
 
 created()
@@ -21,62 +21,67 @@ async function addToFavorites(productId: string) {
   await apiInstance.patch(`/users/${productId}`)
 }
 
-async function handleBuy() {
-  await apiInstance.post(`/products/${id}/buy`)
-  dialogVisible.value = false
-}
-
-function handleClose() {
-  dialogVisible.value = false
+async function addOrRemoveCart() {
+  if (!product.value.isInCart) await addToCart(id)
+  else await removeFromCart(id)
+  await created()
 }
 </script>
 
 <template>
   <el-container
     direction="vertical"
-    class="max-w-[50%] mx-auto items-start"
+    class="max-w-[50%] mx-auto items-start mt-[6.4rem]"
     v-if="product"
   >
-    <el-image :src="product.images[0]" class="h-[24rem]" fit="cover" />
-    <h4 class="text-[2.4rem]">{{ product.name }}</h4>
-    <p class="mb-[1.2rem]">{{ product.description }}</p>
-    <p>Manufacturer: {{ product.producer.name }}</p>
-    <p class="mb-[2.4rem]">Category: {{ product.category.name }}</p>
-    <div class="flex justify-between">
-      <el-button size="large" type="primary" @click="dialogVisible = true">
-        Купить за {{ product.price.toLocaleString() }} ₸
-      </el-button>
-      <el-button
-        size="large"
-        :icon="product.isFavorite ? StarFilled : Star"
-        type="primary"
-        plain
-        @click="addToFavorites(product._id)"
-      />
-    </div>
-  </el-container>
+    <el-row :gutter="24">
+      <el-col :span="10">
+        <el-carousel height="500px">
+          <el-carousel-item v-for="(item, idx) in product.images" :key="idx">
+            <el-image :src="item" fit="cover" />
+          </el-carousel-item>
+        </el-carousel>
+      </el-col>
+      <el-col :span="14">
+        <h4 class="text-[2.6rem] leading-[1.1] font-medium mb-[2.4rem]">
+          {{ product.name }}
+        </h4>
 
-  <el-dialog
-    v-model="dialogVisible"
-    title="Tips"
-    width="500"
-    :before-close="handleClose"
-  >
-    <p>
-      To purchase you product send to
-      <span class="text-red-600">{{ product.price.toLocaleString() }} ₸</span>
-      to this bitcoin address
-    </p>
-    <p class="text-blue-600">1FfmbHfnpaZjKFvyi1okTjJJusN455paPH</p>
-    <template #footer>
-      <div class="dialog-footer">
-        <el-button @click="dialogVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="handleBuy">
-          Confirm that I've sent
-        </el-button>
-      </div>
-    </template>
-  </el-dialog>
+        <div class="flex items-center gap-[1.6rem] mb-[1.6rem]">
+          <img
+            class="h-[6.4rem] object-cover"
+            v-if="product.producer.imageUrl"
+            :src="product.producer.imageUrl"
+            :alt="product.producer.name"
+          />
+        </div>
+
+        <p class="mb-[1.2rem]">{{ product.description }}</p>
+        <p class="mb-[1.6rem]">Category: {{ product.category.name }}</p>
+        <p class="text-[2.4rem] mb-[3.6rem] text-end">
+          Price: {{ product.price }} ₸
+        </p>
+
+        <div class="flex">
+          <el-button
+            size="large"
+            :type="product.isInCart ? 'danger' : 'primary'"
+            :icon="ShoppingCart"
+            @click="addOrRemoveCart"
+          >
+            {{ product.isInCart ? 'Remove from' : 'Add to' }} Cart
+          </el-button>
+          <el-button
+            size="large"
+            :icon="product.isFavorite ? StarFilled : Star"
+            type="primary"
+            plain
+            @click="addToFavorites(product._id)"
+          />
+        </div>
+      </el-col>
+    </el-row>
+  </el-container>
 </template>
 
 <style scoped></style>

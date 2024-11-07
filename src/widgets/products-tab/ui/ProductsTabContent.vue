@@ -15,8 +15,8 @@ interface Image {
 
 interface RuleForm {
   name: string
-  category: null | ICategory
-  producer: null | IProducer
+  category: null | string
+  producer: null | string
   description: string
   price: number
   stock: number
@@ -137,11 +137,13 @@ const onSubmit = async () => {
       const res = await apiInstance.post('/products', {
         ...form,
         images: form.images.map(img => img.value),
+        category: categories.find(cat => form.category === cat._id),
+        producer: producers.find(prod => form.producer === prod._id),
       })
 
       ElNotification({
         title: 'Products',
-        message: `Product with id ${product._id} has been created!`,
+        message: `Product with id ${res._id} has been created!`,
         type: 'success',
       })
 
@@ -168,8 +170,8 @@ function handleShowEdit(product: IProduct) {
   selProductId.value = product._id
 
   editForm.value.name = product.name
-  editForm.value.category = product.category
-  editForm.value.producer = product.producer
+  editForm.value.category = product.category._id
+  editForm.value.producer = product.producer._id
   editForm.value.price = product.price
   editForm.value.description = product.description
   editForm.value.images = Array.from(
@@ -188,6 +190,8 @@ async function handleSubmitEdit() {
       await apiInstance.patch(`/products/${selProductId.value}`, {
         ...editForm.value,
         images: editForm.value.images.map(img => img.value),
+        category: categories.find(cat => editForm.value.category === cat._id),
+        producer: producers.find(prod => editForm.value.producer === prod._id),
       })
 
       ElNotification({
@@ -227,7 +231,7 @@ async function handleSubmitEdit() {
         <el-option
           v-for="(category, idx) in categories"
           :key="idx"
-          :value="category"
+          :value="category.name"
           :label="category.name"
         />
       </el-select>
@@ -241,7 +245,7 @@ async function handleSubmitEdit() {
         <el-option
           v-for="(producer, idx) in producers"
           :key="idx"
-          :value="producer"
+          :value="producer.name"
           :label="producer.name"
         />
       </el-select>
@@ -288,7 +292,7 @@ async function handleSubmitEdit() {
     </el-row>
 
     <el-form-item label="Description" prop="description">
-      <el-input v-model="form.description" type="textarea" rows="5" />
+      <el-input v-model="form.description" type="textarea" :rows="5" />
     </el-form-item>
     <el-form-item>
       <el-button type="primary" @click="onSubmit">Create</el-button>
@@ -360,12 +364,7 @@ async function handleSubmitEdit() {
     </el-table-column>
   </el-table>
 
-  <el-dialog
-    v-model="dialogVisible"
-    title="Tips"
-    width="500"
-    :before-close="handleClose"
-  >
+  <el-dialog v-model="dialogVisible" title="Update Product" width="500">
     <el-form
       :model="editForm"
       :rules="rules"
@@ -385,7 +384,7 @@ async function handleSubmitEdit() {
           <el-option
             v-for="(category, idx) in categories"
             :key="idx"
-            :value="category"
+            :value="category._id"
             :label="category.name"
           />
         </el-select>
@@ -399,7 +398,7 @@ async function handleSubmitEdit() {
           <el-option
             v-for="(producer, idx) in producers"
             :key="idx"
-            :value="producer"
+            :value="producer._id"
             :label="producer.name"
           />
         </el-select>
@@ -450,7 +449,7 @@ async function handleSubmitEdit() {
       </el-row>
 
       <el-form-item label="Description" prop="description">
-        <el-input v-model="editForm.description" type="textarea" rows="8" />
+        <el-input v-model="editForm.description" type="textarea" :rows="8" />
       </el-form-item>
     </el-form>
     <template #footer>

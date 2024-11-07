@@ -7,13 +7,11 @@ import ProducersTabContent from '@/widgets/producers-tab/ui/ProducersTabContent.
 import ProductsTabContent from '@/widgets/products-tab/ui/ProductsTabContent.vue'
 import type { IProducer } from '@/entities/producer/model/types'
 import { fetchProducers } from '@/entities/producer/api'
-import { fetchProducts } from '@/entities/product/api'
-import type { IProduct } from '@/entities/product/model/types'
 
 enum ActiveTab {
   PRODUCTS,
   CATEGORIES,
-  BRANDS,
+  PRODUCERS,
 }
 
 const activeTab = ref<ActiveTab>(ActiveTab.PRODUCTS)
@@ -53,7 +51,7 @@ async function setProducers() {
           @update-categories="setCategories"
         />
       </el-tab-pane>
-      <el-tab-pane label="Brands" :name="ActiveTab.BRANDS">
+      <el-tab-pane label="Producers" :name="ActiveTab.PRODUCERS">
         <ProducersTabContent
           :producers="producerList"
           @update-producers="setProducers"
