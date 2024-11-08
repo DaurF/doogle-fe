@@ -3,6 +3,7 @@ import { type RouteLocationRaw, RouterView, useRouter } from 'vue-router'
 import { ref } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
+import { StarFilled } from '@element-plus/icons-vue'
 
 const userStore = useUserStore()
 const router = useRouter()
@@ -69,6 +70,15 @@ function handleSignOut() {
             index="3"
           >
             Cart
+          </el-menu-item>
+          <el-menu-item
+            @click="handleRouteTransition({ name: 'desired' })"
+            :route="{ name: 'desired' }"
+            index="10"
+          >
+            <el-icon size="20">
+              <StarFilled class="text-[#3f9af7]" />
+            </el-icon>
           </el-menu-item>
         </template>
 

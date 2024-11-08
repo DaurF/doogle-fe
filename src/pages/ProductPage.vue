@@ -2,12 +2,20 @@
 import { ref } from 'vue'
 import type { IProduct } from '@/entities/product/model/types'
 import { apiInstance } from '@/shared/api/base'
-import { ShoppingCart, Star, StarFilled, View } from '@element-plus/icons-vue'
+import { ShoppingCart, Star, StarFilled } from '@element-plus/icons-vue'
 import { addToCart, removeFromCart } from '@/entities/user/api'
+import { useUserStore } from '@/stores/user'
+import { StripeCheckout } from '@vue-stripe/vue-stripe'
+import {
+  addProductToFavorites,
+  removeProductFromFavorites,
+} from '@/entities/product/api'
 
 const { id } = defineProps<{
   id: string
 }>()
+
+const { role } = useUserStore()
 
 const product = ref<IProduct | null>(null)
 
@@ -17,12 +25,14 @@ async function created() {
   product.value = await apiInstance.get<IProduct>(`/products/${id}`)
 }
 
-async function addToFavorites(productId: string) {
-  await apiInstance.patch(`/users/${productId}`)
+async function handleToggleFavorite(productId: string) {
+  if (product.value?.isFavorite) await removeProductFromFavorites(productId)
+  else await addProductToFavorites(productId)
+  await created()
 }
 
 async function addOrRemoveCart() {
-  if (!product.value.isInCart) await addToCart(id)
+  if (!product.value?.isInCart) await addToCart(id)
   else await removeFromCart(id)
   await created()
 }
@@ -47,9 +57,9 @@ async function addOrRemoveCart() {
           {{ product.name }}
         </h4>
 
-        <div class="flex items-center gap-[1.6rem] mb-[1.6rem]">
-          <img
-            class="h-[6.4rem] object-cover"
+        <div class="flex items-center gap-[1.6rem] mb-[3.6rem]">
+          <el-image
+            class="h-[3.2rem] object-cover"
             v-if="product.producer.imageUrl"
             :src="product.producer.imageUrl"
             :alt="product.producer.name"
@@ -59,10 +69,10 @@ async function addOrRemoveCart() {
         <p class="mb-[1.2rem]">{{ product.description }}</p>
         <p class="mb-[1.6rem]">Category: {{ product.category.name }}</p>
         <p class="text-[2.4rem] mb-[3.6rem] text-end">
-          Price: {{ product.price }} ₸
+          Price: {{ product.price.toLocaleString() }} ₸
         </p>
 
-        <div class="flex">
+        <div class="flex" v-if="role === 'customer'">
           <el-button
             size="large"
             :type="product.isInCart ? 'danger' : 'primary'"
@@ -73,12 +83,19 @@ async function addOrRemoveCart() {
           </el-button>
           <el-button
             size="large"
-            :icon="product.isFavorite ? StarFilled : Star"
-            type="primary"
+            :type="product.isFavorite ? 'danger' : 'primary'"
             plain
-            @click="addToFavorites(product._id)"
-          />
+            @click="handleToggleFavorite(product._id)"
+          >
+            <el-icon size="18">
+              <Star v-if="!product.isFavorite" />
+              <StarFilled v-else-if="product.isFavorite" />
+            </el-icon>
+          </el-button>
         </div>
+        <p>
+          Войдите через аккаунт <strong>клиента</strong> для совершения покупока
+        </p>
       </el-col>
     </el-row>
   </el-container>

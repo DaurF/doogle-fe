@@ -18,9 +18,9 @@ export async function deleteRequest(id: string) {
 }
 
 export async function rejectRequest(id: string) {
-  return await apiInstance.patch(`/requests/${id}/reject`)
+  return await apiInstance.patch(`/requests/${id}/reject`, null)
 }
 
-export async function approveRequest(id: string, payload: never) {
+export async function approveRequest(id: string, payload: any) {
   return await apiInstance.patch(`/requests/${id}/approve`, payload)
 }

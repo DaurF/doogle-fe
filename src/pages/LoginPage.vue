@@ -55,8 +55,8 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <el-container direction="vertical" class="max-w-[30%] mx-auto">
-    <h1 class="text-[2.4rem] mt-[1.6rem] mb-[1.2rem]">Login</h1>
+  <el-container direction="vertical" class="max-w-[42rem] mt-[18rem] mx-auto">
+    <h1 class="text-[2.4rem] mb-[1.2rem]">Login</h1>
     <el-form
       :model="form"
       :rules="formRules"

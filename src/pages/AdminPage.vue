@@ -36,7 +36,7 @@ async function setProducers() {
 </script>
 
 <template>
-  <el-container direction="vertical" class="max-w-[60%] mx-auto">
+  <el-container direction="vertical" class="max-w-[125rem] mx-auto">
     <h1 class="text-[2.4rem] mt-[1.6rem] mb-[1.2rem]">Admin panel</h1>
     <el-tabs v-model="activeTab">
       <el-tab-pane label="Products" :name="ActiveTab.PRODUCTS">

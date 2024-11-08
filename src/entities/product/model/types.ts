@@ -13,3 +13,11 @@ export interface IProduct {
   isFavorite: boolean
   isInCart: boolean
 }
+
+export interface IPagination {
+  page: number
+  limit: number
+  search: string
+  category?: string
+  producer?: string
+}

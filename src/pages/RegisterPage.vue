@@ -50,7 +50,7 @@ const formRules = reactive<FormRules<RuleForm>>({
 async function handleSubmit() {
   formRef.value?.validate(async valid => {
     if (valid) {
-      const { email, username, role } = await apiInstance.post(
+      const { email, username, role } = await apiInstance.post<any>(
         '/auth/sign-up',
         form,
       )
@@ -67,8 +67,8 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <el-container direction="vertical" class="max-w-[30%] mx-auto">
-    <h1 class="text-[2.4rem] mt-[1.6rem] mb-[1.2rem]">Register</h1>
+  <el-container direction="vertical" class="max-w-[42rem] mt-[14rem] mx-auto">
+    <h1 class="text-[2.4rem] mb-[1.2rem]">Register</h1>
     <el-form
       :model="form"
       :rules="formRules"
