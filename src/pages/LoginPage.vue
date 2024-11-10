@@ -3,7 +3,7 @@ import { reactive, ref } from 'vue'
 import { apiInstance } from '@/shared/api/base'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import type { FormInstance, FormRules } from 'element-plus'
+import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -36,19 +36,25 @@ const formRules = reactive<FormRules<LoginRuleForm>>({
 async function handleSubmit() {
   await formRef.value?.validate(async valid => {
     if (valid) {
-      const { email, username, role } = await apiInstance.post(
-        '/auth/sign-in',
-        form,
-      )
+      try {
+        const { email, username, role } = await apiInstance.post(
+          '/auth/sign-in',
+          form,
+        )
 
-      console.log(email, username, role)
+        await router.push({ name: 'home' })
 
-      await router.push({ name: 'home' })
+        const payload = { email, username, role }
 
-      const payload = { email, username, role }
-
-      userStore.setUser(payload)
-      localStorage.setItem('user', JSON.stringify(payload))
+        userStore.setUser(payload)
+        localStorage.setItem('user', JSON.stringify(payload))
+      } catch (err) {
+        ElMessage({
+          showClose: true,
+          message: err.response.statusText  ,
+          type: 'error',
+        })
+      }
     }
   })
 }

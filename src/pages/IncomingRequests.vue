@@ -67,7 +67,7 @@ async function handleApproveRequest(request: IRequest) {
 </script>
 
 <template>
-  <el-container direction="vertical" class="max-w-[60%] mx-auto">
+  <el-container direction="vertical" class="max-w-[128rem] mx-auto">
     <h1 class="text-[2.4rem] mt-[1.6rem]">Incoming Requests</h1>
     <el-divider />
     <el-table :data="requests">
