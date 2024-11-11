@@ -30,31 +30,52 @@ const router = createRouter({
       path: '/orders',
       name: 'orders',
       component: OrdersPage,
+      meta: {
+        requiresAuth: true,
+      },
     },
     {
       path: '/cart',
       name: 'cart',
       component: CartPage,
+      meta: {
+        requiresAuth: true,
+      },
     },
     {
       path: '/supplier',
       name: 'supplier',
       component: SupplierPage,
+      meta: {
+        requiresAuth: true,
+        roles: ['supplier'],
+      },
     },
     {
       path: '/requests',
       name: 'requests',
       component: RequestsPage,
+      meta: {
+        requiresAuth: true,
+        roles: ['supplier'],
+      },
     },
     {
       path: '/incoming-requests',
       name: 'incoming-requests',
       component: IncomingRequests,
+      meta: {
+        requiresAuth: true,
+        roles: ['moder', 'admin'],
+      },
     },
     {
       path: '/desired',
       name: 'desired',
       component: DesiredPage,
+      meta: {
+        requiresAuth: true,
+      },
     },
     {
       path: '/incoming-orders',
@@ -71,6 +92,10 @@ const router = createRouter({
       path: '/admin',
       name: 'admin',
       component: AdminPage,
+      meta: {
+        requiresAuth: true,
+        roles: ['admin'],
+      },
     },
     {
       path: '/sign-up',
@@ -83,6 +108,20 @@ const router = createRouter({
       component: LoginPage,
     },
   ],
+})
+
+router.beforeEach(to => {
+  if (to.meta.requiresAuth) {
+    const userJSON = localStorage.getItem('user')
+    const user = JSON.parse(userJSON)
+
+    if (!user) return { name: 'home' }
+
+    if (to.meta.roles && !to.meta.roles.includes(user.role))
+      return { name: 'home' }
+  }
+
+  return true
 })
 
 export default router
