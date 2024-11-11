@@ -11,6 +11,7 @@ import RequestsPage from '@/pages/RequestsPage.vue'
 import IncomingRequests from '@/pages/IncomingRequests.vue'
 import CartPage from '@/pages/CartPage.vue'
 import DesiredPage from '@/pages/DesiredPage.vue'
+import IncomingOrders from '@/pages/IncomingOrders.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -54,6 +55,11 @@ const router = createRouter({
       path: '/desired',
       name: 'desired',
       component: DesiredPage,
+    },
+    {
+      path: '/incoming-orders',
+      name: 'incoming-orders',
+      component: IncomingOrders,
     },
     {
       path: '/product/:id',

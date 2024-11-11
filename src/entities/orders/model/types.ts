@@ -9,6 +9,7 @@ export type OrderPayload = {
 }
 
 export interface IOrder {
+  _id: string
   customer_id: string
   city: string
   address: string

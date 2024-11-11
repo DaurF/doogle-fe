@@ -97,6 +97,14 @@ function handleSignOut() {
           >
             Requests
           </el-menu-item>
+
+          <el-menu-item
+            @click="handleRouteTransition({ name: 'incoming-orders' })"
+            :route="{ name: 'incoming-orders' }"
+            index="7"
+          >
+            Incoming Orders
+          </el-menu-item>
         </template>
 
         <el-menu-item

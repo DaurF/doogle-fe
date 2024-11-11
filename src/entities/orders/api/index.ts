@@ -8,3 +8,7 @@ export async function addOrder(payload: OrderPayload) {
 export async function fetchOrders() {
   return await apiInstance.get<IOrder[]>('/orders')
 }
+
+export async function fetchSupplierOrders() {
+  return await apiInstance.get<IOrder[]>('/orders/supplier')
+}

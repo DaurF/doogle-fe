@@ -77,6 +77,7 @@ async function addOrRemoveCart() {
             size="large"
             :type="product.isInCart ? 'danger' : 'primary'"
             :icon="ShoppingCart"
+            :disabled="product.stock === 0"
             @click="addOrRemoveCart"
           >
             {{ product.isInCart ? 'Remove from' : 'Add to' }} Cart
@@ -93,7 +94,7 @@ async function addOrRemoveCart() {
             </el-icon>
           </el-button>
         </div>
-        <p>
+        <p v-if="role !== 'customer'">
           Войдите через аккаунт <strong>клиента</strong> для совершения покупока
         </p>
       </el-col>
